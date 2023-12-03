@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.app.purchaseTx.prefix }}
+  labels:
+    app.service.name: {{ .Values.app.purchaseTx.prefix }}
+    app.environment: {{ .Values.app.environment }}
+    app.helm.version: this_value_will_be_sed
+spec:
+  replicas: {{ .Values.app.purchaseTx.replicas }}
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app.service.name: {{ .Values.app.purchaseTx.prefix }}
+      app.environment: {{ .Values.app.environment }}
+      app.context: application
+  template:
+    metadata:
+      labels:
+        app.service.name: {{ .Values.app.purchaseTx.prefix }}
+        app.environment: {{ .Values.app.environment }}
+        app.helm.version: this_value_will_be_sed
+    spec:
+      nodeSelector:
+        eks.amazonaws.com/nodegroup: {{ .Values.app.purchaseTx.nodeGroup }}
+      containers:
+      - name: {{ .Values.app.purchaseTx.prefix }}
+        image: {{ .Values.app.purchaseTx.image.name }}
+        imagePullPolicy: {{ .Values.app.purchaseTx.image.policy  }}
+        env:
+          - name: SERVER_PORT
+            value: '{{ .Values.app.purchaseTx.port }}'
+          - name: JAVA_OPTS
+            value: "-Xms{{ div ( mul .Values.app.purchaseTx.memory.max 10) 100 }}M -Xmx{{ div ( mul .Values.app.purchaseTx.memory.max 70) 100 }}M"
+        ports:
+        - containerPort: {{ .Values.app.purchaseTx.port }}
+          name: http-port
+          protocol: TCP
+        readinessProbe:
+          httpGet:
+            port: {{ .Values.app.purchaseTx.port }}
+            path: "/actuator/health"
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          timeoutSeconds: 10
+          successThreshold: 1
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            port: {{ .Values.app.purchaseTx.port }}
+            path: "/actuator/health"
+          initialDelaySeconds: 60
+          periodSeconds: 60
+          timeoutSeconds: 10
+          successThreshold: 1
+          failureThreshold: 3
+        resources:
+          limits:
+            cpu: {{ .Values.app.purchaseTx.cpu.max }}
+            memory: {{ .Values.app.purchaseTx.memory.max }}Mi
+          requests:
+            cpu: {{ .Values.app.purchaseTx.cpu.min }}
+            memory: {{ .Values.app.purchaseTx.memory.min }}Mi
+

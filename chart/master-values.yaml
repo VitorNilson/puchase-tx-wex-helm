@@ -1,0 +1,54 @@
+app:
+  environment: develop
+  purchaseTx:
+    prefix: purchasetx-app
+    nodeGroup: application-node-group
+    replicas: 2
+    port: 8080
+    image:
+      name: vitornilson1998/purhcasetx:develop-stable
+      policy: Always
+    cpu:
+      min: 100m
+      max: 500m
+    memory:
+      min: 1024
+      max: 2048
+    hpa:
+      min: 2
+      max: 5
+      cpuThreshold: 80
+      memoryThreshold: 80
+  queryPurchaseTransactionCronJob:
+    schedule: "0 0 23 1 * *"
+    prefix: query-purchasetx-app
+    nodeGroup: cronjobs-node-group
+    # I would use strategy pattern to find the job by this enum name and run it. This is would be passed as argument to the java -jar command.
+    jobName: QUERY_PURCHASE_TX 
+    image:
+      # This doesn't exists.
+      name: vitornilson1998/purchase-tx-cronjobs:develop-stable
+      policy: Always
+    cpu:
+      min: 100m
+      max: 500m
+    memory:
+      min: 1024
+      max: 1024
+  cleanUpPurchaseTransactionCronJob:
+    schedule: "0 0 1 * * ?"
+    prefix: cleanup-purchasetx-app
+    nodeGroup: cronjobs-node-group
+    # I would use strategy pattern to find the job by this enum name and run it. This is would be passed as argument to the java -jar command.
+    jobName: CLEAN_UP_PURCHASE_TX 
+    image:
+      # This doesn't exists.
+      name: vitornilson1998/purchase-tx-cronjobs:develop-stable
+      policy: Always
+    cpu:
+      min: 100m
+      max: 500m
+    memory:
+      min: 128
+      max: 512
+    

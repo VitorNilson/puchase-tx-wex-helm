@@ -1,0 +1,32 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ .Values.app.cleanUpPurchaseTransactionCronJob.prefix }}
+spec:
+  schedule: "{{ .Values.app.cleanUpPurchaseTransactionCronJob.schedule }}"
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 2
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          nodeSelector:
+            eks.amazonaws.com/nodegroup: {{ .Values.app.cleanUpPurchaseTransactionCronJob.nodeGroup }}
+          containers:
+          - name: {{ .Values.app.cleanUpPurchaseTransactionCronJob.prefix }}
+            image: {{ .Values.app.cleanUpPurchaseTransactionCronJob.image.name }}
+            imagePullPolicy: {{ .Values.app.cleanUpPurchaseTransactionCronJob.image.policy }}
+            command:
+            - java
+            - -jar
+            - app.jar
+            - {{ .Values.app.cleanUpPurchaseTransactionCronJob.jobName }}
+            resources:
+              limits:
+                cpu: {{ .Values.app.cleanUpPurchaseTransactionCronJob.cpu.max }}
+                memory: {{ .Values.app.cleanUpPurchaseTransactionCronJob.memory.max }}Mi
+              requests:
+                cpu: {{ .Values.app.cleanUpPurchaseTransactionCronJob.cpu.min }}
+                memory: {{ .Values.app.cleanUpPurchaseTransactionCronJob.memory.min }}Mi
+          restartPolicy: Never
+      backoffLimit: 3

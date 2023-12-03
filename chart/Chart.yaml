@@ -1,0 +1,7 @@
+apiVersion: v1
+name: wex-purchase-transaction
+description: 'Wex Purchase Transaction Servicess'
+version: "1.0.0"
+maintainers:
+- email: vitornilson1998@gmail.com
+  name: Vitor Nilson
